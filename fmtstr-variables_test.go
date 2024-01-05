@@ -40,7 +40,7 @@ func TestVariables(t *testing.T) {
 
 	Convey("Process", t, func() {
 		v := Variables{}
-		replaced, labelled, variables, err := v.process("")
+		replaced, labelled, variables, err := v.process("", nil)
 		So(err, ShouldEqual, nil)
 		So(replaced, ShouldEqual, "")
 		So(labelled, ShouldEqual, "")
@@ -51,7 +51,7 @@ func TestVariables(t *testing.T) {
 			{Type: "string", Label: "AnotherKey", Source: "%s", Pos: 2, Verb: "s", Value: "two"},
 		}
 
-		replaced, labelled, variables, err = v.process("Test %s %s")
+		replaced, labelled, variables, err = v.process("Test %s %s", []string{"", ""})
 		So(err, ShouldEqual, nil)
 		So(replaced, ShouldEqual, "Test %[1]s %[2]s")
 		So(labelled, ShouldEqual, "Test {Key} {AnotherKey}")
@@ -61,7 +61,7 @@ func TestVariables(t *testing.T) {
 		v[1].Pos = 1
 		v[1].Verb = "d"
 
-		replaced, labelled, variables, err = v.process("Test %[1]s %[2]s")
+		replaced, labelled, variables, err = v.process("Test %[1]s %[2]s", []string{"", ""})
 		So(err, ShouldNotEqual, nil)
 		So(replaced, ShouldEqual, "")
 		So(labelled, ShouldEqual, "")

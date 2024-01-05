@@ -120,12 +120,7 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 
 	}
 
-	if replaced, labelled, variables, err = list.process(format); err == nil {
-		if varc, argc := variables.Count(), len(argv); varc > argc {
-			err = fmt.Errorf("format requires %d argument(s), received %d instead", varc, argc)
-			replaced, labelled, variables = "", "", nil
-		}
-	}
+	replaced, labelled, variables, err = list.process(format, argv)
 	return
 }
 

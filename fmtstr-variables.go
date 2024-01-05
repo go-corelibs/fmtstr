@@ -50,7 +50,7 @@ func (v Variables) Count() (argc int) {
 	return
 }
 
-func (v Variables) process(format string) (replaced, labelled string, variables Variables, err error) {
+func (v Variables) process(format string, argv []string) (replaced, labelled string, variables Variables, err error) {
 	replaced = format[:]
 	labelled = format[:]
 
@@ -71,6 +71,12 @@ func (v Variables) process(format string) (replaced, labelled string, variables 
 
 		replaced = strings.Replace(replaced, variable.Source, variable.String(), 1)
 		labelled = strings.Replace(labelled, variable.Source, "{"+variable.Label+"}", 1)
+	}
+
+	if varc, argc := variables.Count(), len(argv); varc > argc {
+		err = fmt.Errorf("format requires %d argument(s), received %d instead", varc, argc)
+		replaced, labelled, variables = "", "", nil
+		return
 	}
 
 	variables = variables.Sort()
