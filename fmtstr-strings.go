@@ -12,22 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fmtsubs
+package fmtstr
 
-import (
-	"fmt"
-)
+// TODO: move TrimVarPrefix to go-corelibs/strings
 
-type FmtSub struct {
-	Type   string
-	Label  string
-	Source string
-	Pos    int
-	Verb   string
-	Value  string
-}
-
-func (f *FmtSub) String() (value string) {
-	value = fmt.Sprintf(`%%[%d]%s`, f.Pos, f.Value)
+func TrimVarPrefix(tmplVar string) (trimmed string) {
+	if len(tmplVar) > 0 {
+		if tmplVar[0] == '$' || tmplVar[0] == '.' {
+			trimmed = tmplVar[1:]
+			return
+		}
+	}
+	trimmed = tmplVar
 	return
 }
