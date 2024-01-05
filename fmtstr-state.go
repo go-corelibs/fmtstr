@@ -84,6 +84,18 @@ func (s *cState) updatePMHS(r rune, char string) {
 	}
 }
 
+func (s *cState) updateDigitFlag(r rune, char string) {
+	s.value += char
+	if r == '0' && s.width == "" && s.precision == "" {
+		s.zero = true
+	} else if s.decimal {
+		s.precision += char
+	} else {
+		s.width += char
+	}
+	return
+}
+
 func (s *cState) make(subPos int, argv []string) (variable *Variable) {
 	var label, valueType string
 	valueType = s.verb.Type()

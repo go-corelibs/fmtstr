@@ -109,14 +109,7 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 
 			} else if unicode.IsDigit(r) {
 				// no opened brace, is width or precision
-				state.value += char
-				if r == '0' && state.width == "" && state.precision == "" {
-					state.zero = true
-				} else if state.decimal {
-					state.precision += char
-				} else {
-					state.width += char
-				}
+				state.updateDigitFlag(r, char)
 
 			} else {
 				err = fmt.Errorf("invalid format at: %v", state.source)
