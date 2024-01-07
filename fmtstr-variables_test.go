@@ -49,6 +49,8 @@ func TestVariables(t *testing.T) {
 			{Type: "string", Label: "AnotherKey", Source: "%s", Pos: 2, Verb: "s"},
 		}
 
+		So(v.Count(), ShouldEqual, 2)
+
 		replaced, labelled, variables, err = v.process("Test %s %s", []string{"", ""})
 		So(err, ShouldEqual, nil)
 		So(replaced, ShouldEqual, "Test %[1]s %[2]s")
