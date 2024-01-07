@@ -34,7 +34,6 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 
 	currentPos := 1 // currentPos is the positional parameter index, not a string index
 	last := len(format) - 1
-	built := make(map[int][]*cState)
 
 	for i := 0; i <= last; i++ {
 		r := rune(format[i])
@@ -47,8 +46,24 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 			continue
 		}
 
-		// update the source value
-		state.source += char
+		// if opened, record position until closed
+		if opened {
+
+			switch r {
+			case ']':
+			default:
+				// positional brace opened
+				if !closed {
+					if !unicode.IsDigit(r) {
+						err = fmt.Errorf("invalid format at: %v", state.source)
+						return
+					}
+					position += char
+					continue
+				}
+			}
+
+		}
 
 		switch r {
 		case 'b', 'c', 'd', 'e', 'E', 'f', 'F', 'g', 'G', 'o', 'O', 'p', 'q', 's', 't', 'T', 'U', 'v', 'x', 'X':
@@ -57,10 +72,7 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 
 			state.verb = Verb(char)
 
-			subPos := calcVarPos(state, built)
-			list = append(list, state.make(subPos, argv))
-
-			built[state.pos] = append(built[state.pos], state)
+			list = append(list, state.make(argv))
 
 			state = nil
 			opened = false
@@ -97,23 +109,15 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 
 		default:
 
-			if opened {
-				// positional brace opened
-				if !closed && unicode.IsDigit(r) {
-					state.value += char
-					position += char
-				}
-				continue
-
-			} else if unicode.IsDigit(r) {
+			if unicode.IsDigit(r) {
 				// no opened brace, is width or precision
 				state.updateDigitFlag(r, char)
-
-			} else {
-				err = fmt.Errorf("invalid format at: %v", state.source)
-				return
+				continue
 			}
 
+			// not a digit and not a flag
+			err = fmt.Errorf("invalid format at: %v", state.source)
+			return
 		}
 
 	}
@@ -122,41 +126,36 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 	return
 }
 
-func checkContinue(currentPos int, char rune, state *cState) (parsed *cState, proceed bool, err error) {
-	if parsed = state; state == nil {
-		if char == '%' {
-			// found new opening
+func checkContinue(currentPos int, r rune, state *cState) (parsed *cState, proceed bool, err error) {
+	if parsed = state; parsed == nil {
+
+		// state is nil
+		if r == '%' {
+			// found new opening, start a new state
 			parsed = &cState{
 				source: "%",
 				pos:    currentPos,
 			}
 		}
-	} else if char == '%' {
+		return
+
+	} else if r == '%' {
+
+		// state exists, already processing things
+		// this may be a literal percent substitution
 		if parsed.source == "%" {
+			// this is the second half of the literal percent
 			parsed = nil
 			return
 		}
 		// found another opening
 		err = fmt.Errorf("invalid format at: %v", parsed.source+"%")
-	} else {
-		// process this char and state
-		proceed = true
-	}
-	return
-}
+		return
 
-func calcVarPos(state *cState, built map[int][]*cState) (subPos int) {
-	subPos = -1
-	if found, ok := built[state.pos]; ok {
-		for idx, other := range found {
-			if other.value == state.value {
-				subPos = idx
-				break
-			}
-		}
-		if subPos == -1 {
-			subPos = len(found)
-		}
 	}
+
+	// process this rune and state
+	proceed = true
+	state.source += string(r)
 	return
 }
