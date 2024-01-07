@@ -25,11 +25,10 @@ func (v Verb) String() string {
 }
 
 func (v Verb) Label() string {
-	t := v.Type()
 	if v == "-" || v == "q" || v == "v" {
 		return "Var"
 	}
-	return strcase.ToCamel(t)
+	return strcase.ToCamel(v.Type())
 }
 
 func (v Verb) Type() string {
