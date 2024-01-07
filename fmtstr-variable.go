@@ -36,7 +36,6 @@ type Variable struct {
 	Source    string
 	Pos       int
 	Verb      Verb
-	Value     string
 	Width     int
 	Precision int
 	Modifiers Modifier

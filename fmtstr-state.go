@@ -39,7 +39,6 @@ type cState struct {
 	precision string
 
 	source string
-	value  string
 }
 
 func (s *cState) modifiers() (m Modifier) {
@@ -67,25 +66,20 @@ func (s *cState) modifiers() (m Modifier) {
 func (s *cState) updatePMHS(r rune, char string) {
 	switch r {
 	case '+':
-		s.value += char
 		s.plus = true
 
 	case '-':
-		s.value += char
 		s.minus = true
 
 	case '#':
-		s.value += char
 		s.hash = true
 
 	case ' ':
-		s.value += char
 		s.space = true
 	}
 }
 
 func (s *cState) updateDigitFlag(r rune, char string) {
-	s.value += char
 	if r == '0' && s.width == "" && s.precision == "" {
 		s.zero = true
 	} else if s.decimal {
@@ -125,7 +119,6 @@ func (s *cState) make(subPos int, argv []string) (variable *Variable) {
 		Source:    s.source,
 		Pos:       s.pos,
 		Verb:      s.verb,
-		Value:     s.value,
 		Width:     width,
 		Precision: precision,
 		Modifiers: s.modifiers(),

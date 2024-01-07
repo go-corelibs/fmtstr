@@ -56,7 +56,6 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 			// variable parameter
 
 			state.verb = Verb(char)
-			state.value += char
 
 			subPos := calcVarPos(state, built)
 			list = append(list, state.make(subPos, argv))
@@ -94,7 +93,6 @@ func Parse(format string, argv ...string) (replaced, labelled string, variables 
 			currentPos = v
 
 		case '.':
-			state.value += char
 			state.decimal = true
 
 		default:

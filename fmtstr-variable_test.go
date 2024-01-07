@@ -28,7 +28,6 @@ func TestVariable(t *testing.T) {
 			Source: "%s",
 			Pos:    1,
 			Verb:   "s",
-			Value:  "one",
 		}
 		So(v.String(), ShouldEqual, "%[1]s")
 	})

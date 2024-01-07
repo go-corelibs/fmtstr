@@ -25,15 +25,13 @@ func TestVariables(t *testing.T) {
 		f := Variables{}
 		So(f.String(), ShouldEqual, "")
 		f = append(f, &Variable{
-			Pos:   2,
-			Verb:  "s",
-			Value: "two",
+			Pos:  2,
+			Verb: "s",
 		})
 		So(f.String(), ShouldEqual, "%[2]s")
 		f = append(f, &Variable{
-			Pos:   1,
-			Verb:  "s",
-			Value: "one",
+			Pos:  1,
+			Verb: "s",
 		})
 		So(f.String(), ShouldEqual, "%[2]s %[1]s")
 	})
@@ -47,8 +45,8 @@ func TestVariables(t *testing.T) {
 		So(len(variables), ShouldEqual, 0)
 
 		v = Variables{
-			{Type: "string", Label: "Key", Source: "%s", Pos: 1, Verb: "s", Value: "one"},
-			{Type: "string", Label: "AnotherKey", Source: "%s", Pos: 2, Verb: "s", Value: "two"},
+			{Type: "string", Label: "Key", Source: "%s", Pos: 1, Verb: "s"},
+			{Type: "string", Label: "AnotherKey", Source: "%s", Pos: 2, Verb: "s"},
 		}
 
 		replaced, labelled, variables, err = v.process("Test %s %s", []string{"", ""})
