@@ -2,7 +2,7 @@
 [![codecov](https://codecov.io/gh/go-corelibs/fmtstr/graph/badge.svg?token=qkY3ffmjjC)](https://codecov.io/gh/go-corelibs/fmtstr)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-corelibs/fmtstr)](https://goreportcard.com/report/github.com/go-corelibs/fmtstr)
 
-# go-corelibs/fmtstr - format string utility
+# fmtstr - format string utility
 
 fmtstr is a package for parsing fmt package format strings and doing
 interesting things with the results. This package is primarily built
