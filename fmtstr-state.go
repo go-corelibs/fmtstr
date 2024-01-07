@@ -15,10 +15,9 @@
 package fmtstr
 
 import (
-	"fmt"
 	"strconv"
 
-	"github.com/go-corelibs/convert"
+	"github.com/go-corelibs/strings"
 	"github.com/iancoleman/strcase"
 )
 
@@ -90,20 +89,22 @@ func (s *cState) updateDigitFlag(r rune, char string) {
 	return
 }
 
-func (s *cState) make(subPos int, argv []string) (variable *Variable) {
+func (s *cState) make(argv []string) (variable *Variable) {
 	var label, valueType string
 	valueType = s.verb.Type()
+	label = s.verb.Label()
 
+	var arg string
 	if len(argv) >= s.pos {
-		label = strcase.ToCamel(TrimVarPrefix(argv[s.pos-1]))
-		if label != "" && subPos > 0 {
-			label += fmt.Sprintf("%d%s", s.pos, convert.ToLetters(subPos))
+		// pos is within argv range, make label from argv[pos-1]
+		arg = strings.TrimTmplVar(argv[s.pos-1])
+		if arg = strcase.ToCamel(arg); arg != "" {
+			label = arg
 		}
 	}
 
-	if label == "" {
-		label = fmt.Sprintf("%s%d", s.verb.Label(), s.pos)
-	}
+	// all labels have positional indicators?
+	label += strconv.Itoa(s.pos)
 
 	width, precision := 0, 0
 	if s.width != "" {
