@@ -17,8 +17,9 @@ package fmtstr
 import (
 	"strconv"
 
-	"github.com/go-corelibs/strings"
 	"github.com/iancoleman/strcase"
+
+	"github.com/go-corelibs/strings"
 )
 
 type cState struct {
