@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package fmtstr is a fmt format string utility module. fmtstr is intended
+// for use within the Go-Enjin project which parse text/html templates for `_`
+// translation function invocations in order to produce a user interface for
+// updating a locale's translation strings. See Decompose for more details.
 package fmtstr
 
 import (
@@ -25,7 +29,42 @@ var (
 	ErrPosArgNotImpl = errors.New("positional argument support for width and precision is not implemented yet")
 )
 
-func Parse(format string, argv ...string) (replaced, labelled string, variables Variables, err error) {
+// Decompose is intended to be used primarily by the Go-Enjin project for
+// parsing text and html template files for custom `_` translation function
+// calls. The `_` func is essentially a wrapper around a language printer
+// instance's `printer.Sprintf` function. The Go-Enjin `enjenv` command
+// has a `be-extract-locales` sub-command which parses the template sources
+// and identifies these `_` calls, making note of the literal arguments
+// passed to the `_` function. These arguments are further examined and
+// coalesced into the varargs `argv` list passed to Decompose along with
+// the translation `format` string.
+//
+// Decompose examines the `format` string for the standard fmt substitution
+// variables and builds up a list of Variables which contains most of the
+// flags and other components of any given substitution Variable. The only
+// fmt format string feature that Decompose does not support at this time
+// are the explicit argument indexes for the width and precision flags,
+// identified by the square bracketed digit and an asterisk `*`. See the
+// fmt godoc: https://pkg.go.dev/fmt#hdr-Explicit_argument_indexes
+//
+// Decompose returns the list of Variables along with two modified versions
+// of the original format string. The first, `replaced` is the same as the
+// original with the exception that all variables are replaced with their
+// explicit position versions. For example: `%d %d` becomes `%[1]d %[2]d`.
+// The `labelled` format string the variables replaced with labels that
+// are derived from the corresponding argument in the `argv` list given.
+// The labels are CamelCased and have their position suffixed. For example:
+// if `argv[0]` is `$.some_thing`, the label would be `SomeThing1`, and for
+// a more complete example: a format of `%d %d` is labelled as
+// `{Num1} {Num2}` if there were no parsable argv names.
+//
+// If the argv list does not have useful text for labelled, such as if the
+// `enjenv` template parser provided garbage for whatever reason, Decompose
+// is lenient and won't throw any errors about too few arguments to the
+// format string. Decompose will use just the format string specifier and
+// derive a meaningful label from that. For example: `%d` would become
+// `Num1` and `%f` would become `Float1`.
+func Decompose(format string, argv ...string) (replaced, labelled string, variables Variables, err error) {
 
 	var opened, closed bool
 	var position string
