@@ -73,12 +73,6 @@ func (v Variables) process(format string, argv []string) (replaced, labelled str
 		labelled = strings.Replace(labelled, variable.Source, "{"+variable.Label+"}", 1)
 	}
 
-	if varc, argc := variables.Count(), len(argv); varc > argc {
-		err = fmt.Errorf("format requires %d argument(s), received %d instead", varc, argc)
-		replaced, labelled, variables = "", "", nil
-		return
-	}
-
 	variables = variables.Sort()
 	return
 }
