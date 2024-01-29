@@ -17,6 +17,7 @@ package fmtstr
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -50,9 +51,36 @@ func (v Variables) Count() (argc int) {
 	return
 }
 
+func (v Variables) updateLabels() {
+	// check all variables for uniqueness
+	// duplicates get numeric suffix, other than the first
+	unique := make(map[string][]int)
+	for idx, variable := range v {
+		if existing, present := unique[variable.Label]; present {
+			if len(existing) == 1 {
+				if variable.Pos == v[existing[0]].Pos {
+					continue
+				}
+			}
+		}
+		unique[variable.Label] = append(unique[variable.Label], idx)
+	}
+	for label := range unique {
+		if found := unique[label]; len(found) > 1 {
+			for idx, vdx := range found {
+				if idx > 0 {
+					v[vdx].Label += strconv.Itoa(idx)
+				}
+			}
+		}
+	}
+}
+
 func (v Variables) process(format string, argv []string) (replaced, labelled string, variables Variables, err error) {
 	replaced = format[:]
 	labelled = format[:]
+
+	v.updateLabels()
 
 	unique := map[int]*Variable{}
 	for _, variable := range v {

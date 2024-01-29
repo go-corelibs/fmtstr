@@ -104,9 +104,6 @@ func (s *cState) make(argv []string) (variable *Variable) {
 		}
 	}
 
-	// all labels have positional indicators?
-	label += strconv.Itoa(s.pos)
-
 	width, precision := 0, 0
 	if s.width != "" {
 		width, _ = strconv.Atoi(s.width)
