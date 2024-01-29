@@ -6,10 +6,10 @@ github.com/bwesterb/go-ristretto v1.2.0/go.mod h1:fUIoIZaG73pV5biE2Blr2xEzDoMj7N
 github.com/cloudflare/circl v1.1.0/go.mod h1:prBCrKB9DV4poKZY1l9zBXg2QJY7mvgRvtMxxK7fi4I=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-corelibs/slices v1.0.0 h1:jeBNCTnCf+iMgewHLEID8hYppY9JRsVKzAvWoBD49HM=
-github.com/go-corelibs/slices v1.0.0/go.mod h1:vdScCtnJXNqPRvERHAzV/6BvUb9G+1YVYioUkWe801c=
-github.com/go-corelibs/strings v1.1.0 h1:CgGAegd6m0v22+5Z4Moj01PgoQrsGTT99Ok/X4lCrtM=
-github.com/go-corelibs/strings v1.1.0/go.mod h1:9mNooTBL4JeqZXMVyKTNnNrpowW/qOpQ+XHUW55uyb4=
+github.com/go-corelibs/slices v1.2.0 h1:penJP6zL40kv5AUU5ZxkmR9K9lKtCuuKe8LMKcUcYos=
+github.com/go-corelibs/slices v1.2.0/go.mod h1:vdScCtnJXNqPRvERHAzV/6BvUb9G+1YVYioUkWe801c=
+github.com/go-corelibs/strings v1.1.1 h1:noBgP761v4O8UIGLRrWylbgYEYNEOLd0t22e1FxIctQ=
+github.com/go-corelibs/strings v1.1.1/go.mod h1:9mNooTBL4JeqZXMVyKTNnNrpowW/qOpQ+XHUW55uyb4=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
