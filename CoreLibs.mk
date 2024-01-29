@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 VERSION_TAGS        += CORELIBS
 CORELIBS_MK_SUMMARY := Go-CoreLibs.mk
-CORELIBS_MK_VERSION := v0.1.11
+CORELIBS_MK_VERSION := v0.1.14
 
 GOPKG_KEYS          ?=
 GOPKG_AUTO_CORELIBS ?= true
@@ -12,6 +12,7 @@ LOCAL_CORELIBS_PATH ?= ..
 
 .PHONY: help version
 .PHONY: local unlocal be-update tidy
+.PHONE: corelibs packages
 .PHONY: deps build clean fmt
 .PHONY: test coverage goconvey reportcard
 
@@ -22,8 +23,13 @@ LOCAL_CORELIBS_PATH ?= ..
 define __list_gopkgs
 $(if ${GOPKG_KEYS},$(foreach key,${GOPKG_KEYS},$(shell \
 		PKG="$($(key)_GO_PACKAGE)"; \
+		VER="$($(key)_LATEST_VER)"; \
 		if [ -n "$${PKG}" -a "$${PKG}" != "nil" ]; then \
-			echo "$${PKG}$(1)"; \
+			if [ -n "$${VER}" -a -n "$(1)" ]; then \
+				echo "$${PKG}@$${VER}"; \
+			else \
+				echo "$${PKG}$(1)"; \
+			fi; \
 		fi; \
 	)))
 endef
@@ -34,9 +40,10 @@ endef
 
 define __list_corelibs
 $(shell grep -h -v '^module' go.mod \
-		| grep 'go-corelibs/' \
-		| grep -v "${CORELIB_PKG}" \
-		| awk '{print $$1}' \
+		| grep -P '^(require)?\s*github.com/go-corelibs/' \
+		| grep -v "github.com/${CORELIB_PKG} v" \
+		| grep -v "// indirect" \
+		| perl -pe 's!^(require)?\s*!!;s!\s+v\d+(.\d)*.*$$!!;' \
 		| sort -u -V \
 		| while read MODULE; do \
 			NAME=$$(basename "$${MODULE}"); \
@@ -59,6 +66,7 @@ help: export FOUND_LIBS=$(call __list_corelibs)
 help:
 	@echo "# usage: make <help|version>"
 	@echo "#        make <local|unlocal|be-update|tidy>"
+	@echo "#        make <corelibs|packages>"
 	@echo "#        make <deps|build|clean|fmt>"
 	@echo "#        make <test|coverage|goconvey|reportcard>"
 	@echo "#"
@@ -71,6 +79,9 @@ help:
 	@echo "#  unlocal        - go mod edit -dropreplace"
 	@echo "#  be-update      - go get @latest"
 	@echo "#  tidy           - go mod tidy"
+	@echo "#"
+	@echo "#  corelibs       - list detected go-corelibs"
+	@echo "#  packages       - list configured GOPKGS"
 	@echo "#"
 	@echo "#  deps           - install dependencies"
 	@echo "#  build          - go build -v ./..."
@@ -100,6 +111,26 @@ help:
 		fi; \
 	fi
 
+corelibs: export FOUND_LIBS=$(call __list_corelibs)
+corelibs:
+	@if [ -n "$${FOUND_LIBS}" ]; then \
+		for FOUND in $${FOUND_LIBS}; do \
+			echo "# $${FOUND}"; \
+		done; \
+	else \
+		echo "# no go-corelibs detected"; \
+	fi
+
+packages: export FOUND_PKGS=$(call __list_gopkgs)
+packages:
+	@if [ -n "$${FOUND_PKGS}" ]; then \
+		for FOUND in $${FOUND_PKGS}; do \
+			echo "# $${FOUND}"; \
+		done; \
+	else \
+		echo "# no GOPKGS configured"; \
+	fi
+
 version: LIST=$(foreach key,${VERSION_TAGS},\\n# $($(key)_MK_SUMMARY) $($(key)_MK_VERSION))
 version:
 	@echo -e -n "${LIST}" | column -t -N '#,SYSTEM,VERSION'
@@ -108,11 +139,21 @@ local: export FOUND_PKGS=$(call __list_gopkgs)
 local: export FOUND_LIBS=$(call __list_corelibs)
 local:
 	@if [ -n "$${FOUND_PKGS}" -o -n "$${FOUND_LIBS}" ]; then \
-		for found in $${FOUND_PKGS} $${FOUND_LIBS}; do \
+		for found in $${FOUND_LIBS}; do \
 			name=`basename $${found}`; \
 			echo "# go mod local go-corelibs/$${name}"; \
 			go mod edit -replace=$${found}=${LOCAL_CORELIBS_PATH}/$${name}; \
 		done; \
+		$(foreach key,${GOPKG_KEYS},\
+			if [ -n "$($(key)_LOCAL_PATH)" ]; then \
+				if [ -d "$($(key)_LOCAL_PATH)" ]; then \
+					echo "# go mod local $($(key)_GO_PACKAGE)"; \
+					go mod edit -replace=$($(key)_GO_PACKAGE)=$($(key)_LOCAL_PATH); \
+				else \
+					echo "# error: $($(key)_GO_PACKAGE) not found"; \
+				fi; \
+			fi; \
+		) \
 	else \
 		echo "# nothing to do"; \
 	fi
@@ -121,11 +162,17 @@ unlocal: export FOUND_PKGS=$(call __list_gopkgs)
 unlocal: export FOUND_LIBS=$(call __list_corelibs)
 unlocal:
 	@if [ -n "$${FOUND_PKGS}" -o -n "$${FOUND_LIBS}" ]; then \
-		for found in $${FOUND_PKGS} $${FOUND_LIBS}; do \
+		for found in $${FOUND_LIBS}; do \
 			name=`basename $${found}`; \
 			echo "# go mod unlocal go-corelibs/$${name}"; \
 			go mod edit -dropreplace=$${found}; \
 		done; \
+		$(foreach key,${GOPKG_KEYS},\
+			if [ -n "$($(key)_LOCAL_PATH)" ]; then \
+				echo "# go mod unlocal $($(key)_GO_PACKAGE)"; \
+				go mod edit -dropreplace=$($(key)_GO_PACKAGE); \
+			fi; \
+		) \
 	else \
 		echo "# nothing to do"; \
 	fi
@@ -197,7 +244,7 @@ reportcard:
 	@echo "#: go vet"
 	@go vet ./...
 	@echo "#: gocyclo"
-	@gocyclo -over 15 `find * -name "*.go"`
+	@gocyclo -over 15 `find * -name "*.go"` || true
 	@echo "#: ineffassign"
 	@ineffassign ./...
 	@echo "#: misspell"
